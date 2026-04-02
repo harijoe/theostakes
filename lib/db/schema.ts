@@ -2,7 +2,7 @@ import { pgTable, text, timestamp, jsonb } from "drizzle-orm/pg-core";
 
 export type VideoSummary = {
   oneLiner: string;
-  keyTakeaways: Array<{ text: string; timestamp?: string }>;
+  keyTakeaways: Array<{ text: string }>;
   categories: string[];
 };
 
