@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import type { VideoMeta } from "./rss";
 
 const CHANNEL_ID = "UCbRP3c757lWg9M-U7TyEkXA";
@@ -12,7 +13,7 @@ async function getUploadsPlaylistId(apiKey: string): Promise<string> {
 }
 
 export async function fetchAllVideos(options: { limit?: number } = {}): Promise<VideoMeta[]> {
-  const apiKey = process.env.YOUTUBE_API_KEY;
+  const apiKey = env.YOUTUBE_API_KEY;
   if (!apiKey) throw new Error("YOUTUBE_API_KEY is not set");
 
   const playlistId = await getUploadsPlaylistId(apiKey);

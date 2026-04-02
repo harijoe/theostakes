@@ -2,25 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/env";
 import { db } from "@/lib/db/index";
 import { videos } from "@/lib/db/schema";
+import { getExistingCategories } from "@/lib/db/queries";
 import { fetchRssFeed } from "@/lib/youtube/rss";
 import { fetchTranscript } from "@/lib/youtube/transcript";
 import { summarizeTranscript } from "@/lib/llm/summarize";
 import { triggerDeploy } from "@/lib/vercel/deploy";
-import { eq, isNotNull, sql } from "drizzle-orm";
-
-async function getExistingCategories(): Promise<string[]> {
-  const rows = await db
-    .select({ summary: videos.summary })
-    .from(videos)
-    .where(isNotNull(videos.summary));
-  const categories = new Set<string>();
-  for (const row of rows) {
-    for (const cat of row.summary?.categories ?? []) {
-      categories.add(cat);
-    }
-  }
-  return Array.from(categories);
-}
+import { eq, sql } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -29,15 +16,16 @@ export async function GET(request: NextRequest) {
   }
 
   const feed = await fetchRssFeed();
+  const existingCategories = await getExistingCategories();
   let synced = 0;
   let newCount = 0;
 
   for (const meta of feed) {
-    const existing = await db.query.videos.findFirst({
+    const prevRecord = await db.query.videos.findFirst({
       where: eq(videos.vidId, meta.vidId),
     });
 
-    const isNew = !existing;
+    const isNew = !prevRecord;
 
     await db
       .insert(videos)
@@ -61,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     if (isNew) newCount++;
 
-    let transcript = existing?.transcript ?? null;
+    let transcript = prevRecord?.transcript ?? null;
     if (!transcript) {
       transcript = await fetchTranscript(meta.vidId);
       if (transcript) {
@@ -72,8 +60,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (transcript && !existing?.summary) {
-      const existingCategories = await getExistingCategories();
+    if (transcript && !prevRecord?.summary) {
       const summary = await summarizeTranscript(transcript, existingCategories);
       await db
         .update(videos)
