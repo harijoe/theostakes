@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { env } from "@/env";
 import { db } from "@/lib/db/index";
 import { videos } from "@/lib/db/schema";
 import { fetchRssFeed } from "@/lib/youtube/rss";
@@ -23,7 +24,7 @@ async function getExistingCategories(): Promise<string[]> {
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

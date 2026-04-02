@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { env } from "@/env";
 import { db } from "@/lib/db/index";
 import { videos } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -7,7 +8,7 @@ import { eq } from "drizzle-orm";
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  if (!process.env.POSTGRES_URL) return [];
+  if (!env.POSTGRES_URL) return [];
   const allVideos = await db.select({ vidId: videos.vidId }).from(videos);
   return allVideos.map((v) => ({ vid_id: v.vidId }));
 }

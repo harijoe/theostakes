@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { env } from "@/env";
 import { db } from "@/lib/db/index";
 import { videos } from "@/lib/db/schema";
 import { desc, isNotNull } from "drizzle-orm";
@@ -7,7 +8,7 @@ import { desc, isNotNull } from "drizzle-orm";
 export const dynamic = "force-static";
 
 export default async function Home() {
-  const allVideos = process.env.POSTGRES_URL
+  const allVideos = env.POSTGRES_URL
     ? await db.select().from(videos).where(isNotNull(videos.summary)).orderBy(desc(videos.date))
     : [];
 
