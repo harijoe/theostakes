@@ -3,15 +3,22 @@ import { videos } from "../lib/db/schema";
 import { getExistingCategories } from "../lib/db/queries";
 import { summarizeTranscript } from "../lib/llm/summarize";
 import { sleep } from "../lib/utils";
-import { eq, isNotNull, sql } from "drizzle-orm";
+import { desc, eq, isNotNull, sql } from "drizzle-orm";
 
 const vidIdArg = process.argv.indexOf("--vid-id");
 const targetVidId = vidIdArg !== -1 ? process.argv[vidIdArg + 1] : null;
 
+const lastArg = process.argv.indexOf("--last");
+const lastN = lastArg !== -1 ? parseInt(process.argv[lastArg + 1], 10) : null;
+
 async function main() {
   const rows = targetVidId
     ? await db.query.videos.findMany({ where: eq(videos.vidId, targetVidId) })
-    : await db.query.videos.findMany({ where: isNotNull(videos.transcript) });
+    : await db.query.videos.findMany({
+        where: isNotNull(videos.transcript),
+        orderBy: [desc(videos.date)],
+        limit: lastN ?? undefined,
+      });
 
   const withTranscript = rows.filter((r) => r.transcript != null);
   console.log(`Regenerating summaries for ${withTranscript.length} video(s)`);
