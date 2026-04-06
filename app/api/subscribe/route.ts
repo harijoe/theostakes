@@ -5,7 +5,6 @@ import { subscribers } from "@/lib/db/schema";
 import { getResend, FROM_ADDRESS } from "@/lib/email/resend";
 import { verificationEmail } from "@/lib/email/templates";
 import { randomBytes } from "crypto";
-import { sql } from "drizzle-orm";
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -24,7 +23,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
   }
 
-  const { email } = parsed.data;
+  const email = parsed.data.email.toLowerCase();
   const token = randomBytes(32).toString("hex");
 
   await db
@@ -32,7 +31,7 @@ export async function POST(request: NextRequest) {
     .values({ email, token, verified: false })
     .onConflictDoUpdate({
       target: subscribers.email,
-      set: { token, verified: false, createdAt: sql`now()` },
+      set: { token, verified: false },
     });
 
   const { subject, html } = verificationEmail(token);
