@@ -8,6 +8,7 @@ export const env = createEnv({
     YOUTUBE_API_KEY: z.string().min(1).optional(),
     VERCEL_DEPLOY_HOOK_URL: z.string().url().optional(),
     CRON_SECRET: z.string().min(1).optional(),
+    RESEND_API_KEY: z.string().min(1).optional(),
   },
   client: {},
   runtimeEnv: {
@@ -16,6 +17,7 @@ export const env = createEnv({
     YOUTUBE_API_KEY: process.env.YOUTUBE_API_KEY,
     VERCEL_DEPLOY_HOOK_URL: process.env.VERCEL_DEPLOY_HOOK_URL,
     CRON_SECRET: process.env.CRON_SECRET,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,
