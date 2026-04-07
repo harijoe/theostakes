@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { VideoSummary } from "@/lib/db/schema";
 
 type Video = {
@@ -15,14 +15,25 @@ const PAGE_SIZE = 5;
 
 export function VideoList({ videos }: { videos: Video[] }) {
   const [page, setPage] = useState(0);
+  const [seenBefore, setSeenBefore] = useState<string | null>(null);
+
+  useEffect(() => {
+    const key = "lastVisitAt";
+    const prev = localStorage.getItem(key);
+    localStorage.setItem(key, new Date().toISOString());
+    if (prev) setSeenBefore(prev);
+  }, []);
+
   const totalPages = Math.ceil(videos.length / PAGE_SIZE);
   const pageVideos = videos.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   return (
     <div>
       <div className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
-        {pageVideos.map((video) => (
-          <article key={video.vidId} className="py-6 first:pt-0">
+        {pageVideos.map((video) => {
+          const isNew = seenBefore !== null && video.date > seenBefore;
+          return (
+          <article key={video.vidId} className={`py-6 first:pt-0 pl-3 border-l-2 ${isNew ? "border-blue-400 dark:border-blue-500" : "border-transparent"}`}>
             {video.summary?.oneLiner && (
               <p className="text-base font-medium text-zinc-900 dark:text-zinc-100 mb-2">
                 {video.summary.oneLiner}
@@ -69,7 +80,8 @@ export function VideoList({ videos }: { videos: Video[] }) {
               )}
             </div>
           </article>
-        ))}
+          );
+        })}
       </div>
 
       {totalPages > 1 && (
