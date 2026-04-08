@@ -3,6 +3,7 @@ import { db } from "@/lib/db/index";
 import { videos } from "@/lib/db/schema";
 import { desc, isNotNull } from "drizzle-orm";
 import { VideoList } from "./video-list";
+import { SubscribeForm } from "./subscribe-form";
 
 export const dynamic = "force-static";
 
@@ -23,7 +24,7 @@ export default async function Home() {
     <div>
       <div className="mb-10">
         <h1 className="text-3xl font-bold tracking-tight mb-1">Theo&apos;s Takes</h1>
-        <p className="text-zinc-500 dark:text-zinc-400">
+        <p className="text-zinc-500 dark:text-zinc-400 mb-4">
           Key takeaways from{" "}
           <a
             href="https://www.youtube.com/@t3dotgg"
@@ -35,6 +36,7 @@ export default async function Home() {
           </a>{" "}
           videos, so you don&apos;t have to watch them all.
         </p>
+        <SubscribeForm />
       </div>
 
       {serialized.length === 0 ? (
