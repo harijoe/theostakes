@@ -4,8 +4,6 @@ import { videos } from "@/lib/db/schema";
 import { desc, isNotNull } from "drizzle-orm";
 import { VideoList } from "./video-list";
 
-export const dynamic = "force-static";
-
 export default async function Home() {
   const allVideos = env.POSTGRES_URL
     ? await db.select().from(videos).where(isNotNull(videos.summary)).orderBy(desc(videos.date))
