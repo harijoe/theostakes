@@ -57,6 +57,8 @@ export async function GET(request: NextRequest) {
           .update(videos)
           .set({ transcript, updatedAt: sql`now()` })
           .where(eq(videos.vidId, meta.vidId));
+      } else {
+        console.warn(`[sync] no transcript available for ${meta.vidId} ("${meta.title}")`);
       }
     }
 
@@ -66,6 +68,7 @@ export async function GET(request: NextRequest) {
         .update(videos)
         .set({ summary, updatedAt: sql`now()` })
         .where(eq(videos.vidId, meta.vidId));
+      console.log(`[sync] summarized ${meta.vidId} ("${meta.title}")`);
     }
 
     synced++;
