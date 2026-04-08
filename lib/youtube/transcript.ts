@@ -11,7 +11,8 @@ export async function fetchTranscript(vidId: string): Promise<string | null> {
   try {
     const segments = await YoutubeTranscript.fetchTranscript(vidId);
     return segments.map((s) => `[${formatTimestamp(s.offset)}] ${s.text}`).join(" ");
-  } catch {
+  } catch (err) {
+    console.error(`[fetchTranscript] failed for ${vidId}:`, err instanceof Error ? err.message : err);
     return null;
   }
 }
