@@ -9,7 +9,7 @@ let _db: Db | null = null;
 
 function getDb(): Db {
   if (!_db) {
-    const sql = neon(env.POSTGRES_URL!);
+    const sql = neon(env.POSTGRES_URL!, { fetchOptions: { cache: "no-store" } });
     _db = drizzle(sql, { schema });
   }
   return _db;
