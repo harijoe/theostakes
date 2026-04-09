@@ -63,12 +63,19 @@ export async function GET(request: NextRequest) {
     }
 
     if (transcript && !prevRecord?.summary) {
-      const summary = await summarizeTranscript(transcript, existingCategories);
-      await db
-        .update(videos)
-        .set({ summary, updatedAt: sql`now()` })
-        .where(eq(videos.vidId, meta.vidId));
-      console.log(`[sync] summarized ${meta.vidId} ("${meta.title}")`);
+      try {
+        const summary = await summarizeTranscript(transcript, existingCategories);
+        await db
+          .update(videos)
+          .set({ summary, updatedAt: sql`now()` })
+          .where(eq(videos.vidId, meta.vidId));
+        console.log(`[sync] summarized ${meta.vidId} ("${meta.title}")`);
+      } catch (err) {
+        console.error(
+          `[sync] summarize failed for ${meta.vidId} ("${meta.title}"):`,
+          err instanceof Error ? err.message : err
+        );
+      }
     }
 
     synced++;

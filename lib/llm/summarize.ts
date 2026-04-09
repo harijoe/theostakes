@@ -39,7 +39,23 @@ export async function summarizeTranscript(
     ],
   });
 
-  const text = message.content[0].type === "text" ? message.content[0].text : "";
-  const parsed = JSON.parse(text) as VideoSummary;
+  const block = message.content[0];
+  if (!block || block.type !== "text") {
+    throw new Error(
+      `Unexpected Anthropic response: stop_reason=${message.stop_reason}, content=${JSON.stringify(message.content)}`
+    );
+  }
+
+  // Strip markdown code fences if Claude wrapped the JSON
+  const text = block.text.replace(/^```(?:json)?\n?/i, "").replace(/\n?```$/i, "").trim();
+
+  let parsed: VideoSummary;
+  try {
+    parsed = JSON.parse(text) as VideoSummary;
+  } catch (err) {
+    throw new Error(
+      `Failed to parse Anthropic response as JSON: ${err instanceof Error ? err.message : err}\nRaw response: ${block.text.slice(0, 500)}`
+    );
+  }
   return parsed;
 }
